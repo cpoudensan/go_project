@@ -17,4 +17,71 @@ func Dijkstra(graph map[string]map[string]int, start string, target string) ([]s
 	if start == target {
 		return []string{start}, 0, nil
 	}
+	dist := make(map[string]int)
+	prev := make(map[string]string)
+	visited := make(map[string]bool)
 
+	// initialiser toutes les distances à "infini"
+	for city := range graph {
+		dist[city] = math.MaxInt / 4
+	}
+	dist[start] = 0
+
+	for {
+		// A) trouver la ville non visitée la plus proche
+		u := ""
+		best := math.MaxInt / 4
+
+		for city := range graph {
+			if !visited[city] && dist[city] < best {
+				best = dist[city]
+				u = city
+			}
+		}
+
+		// plus rien atteignable
+		if u == "" {
+			return nil, 0, ErrNoRoute
+		}
+
+		// atteint target
+		if u == target {
+			break
+		}
+
+		visited[u] = true
+
+		// B) relaxer les voisins
+		for v, w := range graph[u] {
+			if visited[v] {
+				continue
+			}
+			alt := dist[u] + w
+			if alt < dist[v] {
+				dist[v] = alt
+				prev[v] = u
+			}
+		}
+	}
+
+	// reconstruire le chemin
+	path := []string{}
+	cur := target
+	path = append(path, cur)
+
+	for cur != start {
+		p, ok := prev[cur]
+		if !ok {
+			return nil, 0, ErrNoRoute
+		}
+		cur = p
+		path = append(path, cur)
+	}
+
+	// reverse
+	for i, j := 0, len(path)-1; i < j; i, j = i+1, j-1 {
+		path[i], path[j] = path[j], path[i]
+	}
+
+	return path, dist[target], nil
+}
