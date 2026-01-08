@@ -1,3 +1,4 @@
+package main 
 graph := map[string]map[string]int{
 	"Paris": {
 		"Lille": 225, "Rennes": 350, "Nantes": 385,
