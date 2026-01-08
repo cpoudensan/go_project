@@ -1,5 +1,6 @@
-package main 
-graph := map[string]map[string]int{
+package main
+
+var Graph = map[string]map[string]int{
 	"Paris": {
 		"Lille": 225, "Rennes": 350, "Nantes": 385,
 		"Strasbourg": 490, "Dijon": 315, "Lyon": 465,
