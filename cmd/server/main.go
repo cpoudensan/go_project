@@ -7,6 +7,20 @@ import (
 	"net"
 )
 
+func handleClient(conn net.Conn) {
+	defer conn.Close()
+	r := bufio.NewReader(conn)
+
+	for {
+		line, err := r.ReadString('\n') // attend une ligne
+		if err != nil {
+			return
+		}
+		fmt.Println("Received:", line)
+		io.WriteString(conn, "OK\n")
+	}
+}
+
 func main() {
 	ln, err := net.Listen("tcp", ":8000")
 	if err != nil {
@@ -14,22 +28,12 @@ func main() {
 	}
 	fmt.Println("Listening on :8000")
 
-	conn, err := ln.Accept() // attend 1 client
-	if err != nil {
-		panic(err)
-	}
-	defer conn.Close()
-
-	reader := bufio.NewReader(conn)
-	line, err := reader.ReadString('\n') // attend 1 ligne
-	if err != nil {
-		if err == io.EOF {
-			return
+	for {
+		conn, err := ln.Accept() // attend un client
+		if err != nil {
+			fmt.Println("accept error:", err)
+			continue
 		}
-		io.WriteString(conn, "ERR read_error\n")
-		return
+		go handleClient(conn)
 	}
-
-	fmt.Println("Received:", line)
-	io.WriteString(conn, "OK\n")
 }
