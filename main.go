@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 )
-
 func main() {
 
 	file, err := os.Open("data.txt")
