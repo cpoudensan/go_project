@@ -21,14 +21,14 @@ func Dijkstra(graph map[string]map[string]int, start string, target string) ([]s
 	prev := make(map[string]string)
 	visited := make(map[string]bool)
 
-	// initialiser toutes les distances à "infini"
+	// initialiser toutes les distances à "infini" sauf le départ
 	for city := range graph {
 		dist[city] = math.MaxInt / 4
 	}
 	dist[start] = 0
 
 	for {
-		// A) trouver la ville non visitée la plus proche
+		// trouver la ville non visitée la plus proche
 		u := ""
 		best := math.MaxInt / 4
 
@@ -44,14 +44,14 @@ func Dijkstra(graph map[string]map[string]int, start string, target string) ([]s
 			return nil, 0, ErrNoRoute
 		}
 
-		// atteint target
+		// on a atteint target
 		if u == target {
 			break
 		}
-
+         //marquer qu'on a bien visité la ville
 		visited[u] = true
 
-		// B) relaxer les voisins
+		// check si on peut améliorer la distance pour aller vers un voisin
 		for v, w := range graph[u] {
 			if visited[v] {
 				continue
@@ -64,7 +64,7 @@ func Dijkstra(graph map[string]map[string]int, start string, target string) ([]s
 		}
 	}
 
-	// reconstruire le chemin
+	// reconstruire le chemin (à l'envers)
 	path := []string{}
 	cur := target
 	path = append(path, cur)
@@ -78,7 +78,7 @@ func Dijkstra(graph map[string]map[string]int, start string, target string) ([]s
 		path = append(path, cur)
 	}
 
-	// reverse
+	// on renverse pour avoir le bon chemin
 	for i, j := 0, len(path)-1; i < j; i, j = i+1, j-1 {
 		path[i], path[j] = path[j], path[i]
 	}

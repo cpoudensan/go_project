@@ -14,7 +14,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	// Lire les réponses du serveur en continu
+	// Lire les réponses du serveur en continu et les afficher
 	go func() {
 		r := bufio.NewReader(conn)
 		for {
@@ -25,7 +25,7 @@ func main() {
 			fmt.Print("Server: ", line)
 		}
 	}()
-
+     //deuxième goroutine: lit le clavier et envoie la ligne au serveur
 	fmt.Println("Tape une ligne puis Entrée :")
 	sc := bufio.NewScanner(os.Stdin)
 	for sc.Scan() {
