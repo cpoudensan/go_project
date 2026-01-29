@@ -64,7 +64,7 @@ Dijkstra avec :
 Signature identique à ton ancienne fonction:
 ([]string, int, error)
 */
-func Dijkstra(graph map[string]map[string]int, start string, target string) ([]string, int, error) {
+func Dijkstra_pq(graph map[string]map[string]int, start string, target string) ([]string, int, error) {
 	// ---- 0) Cache lookup ----
 	key := start + "|" + target
 
