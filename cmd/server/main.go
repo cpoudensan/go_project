@@ -22,13 +22,13 @@ func handleClient(conn net.Conn) {
 		if line == "" {
 			continue
 		}
-         //découpe par espaces, si pas 3 éléments -> erreur
+		//découpe par espaces, si pas 3 éléments -> erreur
 		parts := strings.Fields(line)
 		if len(parts) != 3 {
 			io.WriteString(conn, "ERR bad_request\n")
 			continue
 		}
-         //si premier mot entré par utilisateur pas "route"-> erreur
+		//si premier mot entré par utilisateur pas "route"-> erreur
 		if strings.ToUpper(parts[0]) != "ROUTE" {
 			io.WriteString(conn, "ERR unknown_cmd\n")
 			continue
@@ -36,8 +36,8 @@ func handleClient(conn net.Conn) {
 
 		from := parts[1]
 		to := parts[2]
-        //calculer Djikstra avec graphe, ville de départ et d'arrivée choisies
-		path, dist, err := Dijkstra(Graph, from, to)
+		//calculer Djikstra avec graphe, ville de départ et d'arrivée choisies
+		path, dist, err := Dijkstra_pq(Graph, from, to)
 		if err != nil {
 			if err == ErrUnknownCity {
 				io.WriteString(conn, "ERR unknown_city\n")
@@ -48,18 +48,19 @@ func handleClient(conn net.Conn) {
 			}
 			continue
 		}
-         //envoie la réponse sur la connexion pour le client qui l'a demandé
+		//envoie la réponse sur la connexion pour le client qui l'a demandé
 		io.WriteString(conn, fmt.Sprintf("OK dist=%d path=%s\n", dist, strings.Join(path, "->")))
 	}
 }
- //ouvre un serveur TCP
+
+// ouvre un serveur TCP
 func main() {
 	ln, err := net.Listen("tcp", ":8000")
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Listening on :8000")
-     //Accept() attends une connexion et renvoie une conn
+	//Accept() attends une connexion et renvoie une conn
 	for {
 		conn, err := ln.Accept()
 		if err != nil {

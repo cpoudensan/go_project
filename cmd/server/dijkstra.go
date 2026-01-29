@@ -5,14 +5,15 @@ import (
 	"math"
 )
 
-var ErrUnknownCity = errors.New("unknown city")
-var ErrNoRoute = errors.New("no route possible")
+var ErrorUnknownCity = errors.New("unknown city")
+var ErrorNoRoute = errors.New("no route possible")
+
 func Dijkstra(graph map[string]map[string]int, start string, target string) ([]string, int, error) {
 	if _, ok := graph[start]; ok == false {
-		return nil, 0, ErrUnknownCity
+		return nil, 0, ErrorUnknownCity
 	}
 	if _, ok := graph[target]; ok == false {
-		return nil, 0, ErrUnknownCity
+		return nil, 0, ErrorUnknownCity
 	}
 	if start == target {
 		return []string{start}, 0, nil
@@ -41,14 +42,14 @@ func Dijkstra(graph map[string]map[string]int, start string, target string) ([]s
 
 		// plus rien atteignable
 		if u == "" {
-			return nil, 0, ErrNoRoute
+			return nil, 0, ErrorNoRoute
 		}
 
 		// on a atteint target
 		if u == target {
 			break
 		}
-         //marquer qu'on a bien visité la ville
+		//marquer qu'on a bien visité la ville
 		visited[u] = true
 
 		// check si on peut améliorer la distance pour aller vers un voisin
@@ -72,7 +73,7 @@ func Dijkstra(graph map[string]map[string]int, start string, target string) ([]s
 	for cur != start {
 		p, ok := prev[cur]
 		if !ok {
-			return nil, 0, ErrNoRoute
+			return nil, 0, ErrorNoRoute
 		}
 		cur = p
 		path = append(path, cur)
