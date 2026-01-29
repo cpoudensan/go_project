@@ -7,9 +7,6 @@ import (
 	"sync"
 )
 
-/*
-Erreurs retournées par Dijkstra
-*/
 var ErrUnknownCity = errors.New("unknown city")
 var ErrNoRoute = errors.New("no route possible")
 
@@ -29,7 +26,7 @@ var (
 	routeCache = make(map[string]RouteResult)
 )
 
-// ---- Priority Queue (min-heap) ----
+// Priority Queue (min-heap, tas)
 
 type pqItem struct {
 	city string
@@ -58,14 +55,11 @@ func (pq *priorityQueue) Pop() any {
 
 /*
 Dijkstra avec :
-- Priority Queue (heap) => plus rapide que le scan O(V) à chaque étape
-- Cache intégré => si même requête (start,target), réponse immédiate
-
-Signature identique à ton ancienne fonction:
-([]string, int, error)
+- Tas -> plus rapide que le scan O(V) à chaque étape
+- Cache intégré -> si même requête (start,target), réponse immédiate
 */
 func Dijkstra_pq(graph map[string]map[string]int, start string, target string) ([]string, int, error) {
-	// ---- 0) Cache lookup ----
+	// Cache lookup
 	key := start + "|" + target
 
 	cacheMu.RLock()
@@ -82,7 +76,6 @@ func Dijkstra_pq(graph map[string]map[string]int, start string, target string) (
 		return nil, cached.Dist, cached.Err
 	}
 
-	// ---- 1) Vérifs de base ----
 	if _, ok := graph[start]; !ok {
 		// stocker dans le cache
 		cacheMu.Lock()
@@ -107,7 +100,6 @@ func Dijkstra_pq(graph map[string]map[string]int, start string, target string) (
 		return pathCopy, 0, nil
 	}
 
-	// ---- 2) Structures Dijkstra ----
 	dist := make(map[string]int, len(graph))
 	prev := make(map[string]string, len(graph))
 	visited := make(map[string]bool, len(graph))
@@ -118,33 +110,29 @@ func Dijkstra_pq(graph map[string]map[string]int, start string, target string) (
 	}
 	dist[start] = 0
 
-	// ---- 3) Init heap ----
+	// Init heap
 	pq := &priorityQueue{}
 	heap.Init(pq)
 	heap.Push(pq, pqItem{city: start, dist: 0})
 
-	// ---- 4) Boucle principale ----
 	for pq.Len() > 0 {
 		it := heap.Pop(pq).(pqItem)
 		u := it.city
 
-		// Si entrée périmée (on a déjà trouvé mieux), ignore
 		if it.dist != dist[u] {
 			continue
 		}
-		// Si déjà visitée, ignore
+
 		if visited[u] {
 			continue
 		}
 
-		// Si on atteint target, on peut stopper
 		if u == target {
 			break
 		}
 
 		visited[u] = true
 
-		// Relaxer les voisins
 		for v, w := range graph[u] {
 			if visited[v] {
 				continue
@@ -158,7 +146,7 @@ func Dijkstra_pq(graph map[string]map[string]int, start string, target string) (
 		}
 	}
 
-	// ---- 5) Pas de route ? ----
+	// Pas de route
 	if dist[target] >= inf {
 		cacheMu.Lock()
 		routeCache[key] = RouteResult{Path: nil, Dist: 0, Err: ErrNoRoute}
@@ -166,7 +154,6 @@ func Dijkstra_pq(graph map[string]map[string]int, start string, target string) (
 		return nil, 0, ErrNoRoute
 	}
 
-	// ---- 6) Reconstruire le chemin ----
 	path := []string{}
 	cur := target
 	path = append(path, cur)
@@ -188,8 +175,7 @@ func Dijkstra_pq(graph map[string]map[string]int, start string, target string) (
 		path[i], path[j] = path[j], path[i]
 	}
 
-	// ---- 7) Stocker résultat dans le cache ----
-	// (on stocke une copie du slice)
+	//Stocker résultat dans le cache
 	stored := make([]string, len(path))
 	copy(stored, path)
 
